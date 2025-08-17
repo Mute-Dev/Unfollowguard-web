@@ -1,11 +1,15 @@
-// sw-v4.js
-const CACHE_STATIC = 'ug-static-v4';
-const CACHE_PAGES  = 'ug-pages-v4';
+// sw-v3.js
+const CACHE_STATIC = 'ug-static-v3';
+const CACHE_PAGES  = 'ug-pages-v3';
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_STATIC).then(c =>
-      c.addAll(['./','./unfollowguard_logo.png','./manifest.webmanifest'])
+      c.addAll([
+        './',
+        './unfollowguard_logo.png',
+        './manifest.webmanifest'
+      ])
     )
   );
   self.skipWaiting();
@@ -24,6 +28,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
   const accept = req.headers.get('accept') || '';
+
   if (accept.includes('text/html') || req.mode === 'navigate') {
     event.respondWith(
       fetch(req).then(resp => {
@@ -34,6 +39,7 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
+
   event.respondWith(
     caches.match(req).then(r => r || fetch(req).then(resp => {
       const copy = resp.clone();
