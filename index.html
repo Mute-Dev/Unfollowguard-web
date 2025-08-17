@@ -5,14 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UnfollowGuard</title>
 
-<!-- PWA (optional; remove if you didn't add the files yet) -->
+<!-- PWA -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0e101a">
 <link rel="icon" href="unfollowguard_logo.png" type="image/png">
+
+<!-- Force old SWs to unregister, then register the new one -->
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-  }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) {
+        if (!reg.active || !reg.active.scriptURL.endsWith('sw-v3.js')) {
+          try { await reg.unregister(); } catch(e){}
+        }
+      }
+      await navigator.serviceWorker.register('./sw-v3.js', { scope: './' });
+      // reload once so the new SW takes control immediately
+      if (sessionStorage.getItem('sw-reloaded') !== '1') {
+        sessionStorage.setItem('sw-reloaded','1'); location.reload();
+      }
+    } catch(e) {}
+  });
+}
 </script>
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,27 +37,27 @@
   :root{
     --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
     --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
-    --logo-gap:-28px; /* desktop/tablet gap under logo */
+    --logo-gap:-22px; /* desktop/tablet gap under logo */
   }
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
   html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink)}
   .wrap{
     max-width:1000px;margin:0 auto;
-    padding: calc(8px + env(safe-area-inset-top)) 22px 22px; /* honors iOS notch */
+    padding: calc(8px + env(safe-area-inset-top)) 22px 22px; /* iOS safe area */
   }
 
   /* --- HERO --- */
   .logo{
     display:block;
-    max-width: clamp(300px, 42vw, 520px); /* big on desktop */
-    height:auto; aspect-ratio: 1/1;       /* prevents layout jump on iOS */
-    margin: 8px auto var(--logo-gap) auto;
+    max-width: clamp(300px, 42vw, 520px);
+    height:auto; aspect-ratio:1/1;
+    margin:8px auto var(--logo-gap) auto;
   }
   .subtitle{
     color:var(--muted);
     text-align:center;
-    margin: 0 0 12px;
+    margin:0 0 12px;
     line-height:1.35;
   }
 
@@ -52,17 +68,20 @@
   .click-hint{color:var(--muted);font-size:.9rem;margin-top:2px}
   .hidden{display:none}
 
-  /* --- ROW UTILS --- */
-  .row{display:flex;gap:14px;flex-wrap:wrap}
-  .center{justify-content:center;align-items:center}
+  /* --- HINTS: ALWAYS 2 COLUMNS --- */
+  .hints{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr); /* side-by-side, never stack */
+    gap:8px 16px;
+    align-items:center;
+    justify-items:start;
+    margin:6px 0 8px;
+  }
+  .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;line-height:1; white-space:nowrap;}
+  .hint .val{color:#cfd1da; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
 
-  /* --- HINTS (FILES) --- */
-  .hints{display:flex;gap:22px;justify-content:center;align-items:baseline;margin:6px 0 8px}
-  .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;line-height:1}
-  .hint .val{color:#cfd1da}
-
-  /* --- STATS CHIPS --- */
-  .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:6px 0 8px}
+  /* --- STATS --- */
+  .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:6px 0 8px;flex-wrap:wrap}
   .chip{background:var(--chip);padding:10px 14px;border-radius:12px;min-width:260px;
         display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line)}
   .chip .k{opacity:.9}
@@ -82,18 +101,14 @@
   /* --- FOOTER --- */
   .footer{color:var(--muted);text-align:center;margin:8px 0 24px}
 
-  /* ---------- MOBILE TUNING ---------- */
+  /* ---------- MOBILE ---------- */
   @media (max-width:600px){
-    :root{ --logo-gap:-8px; }                 /* less negative to avoid overlap on phones */
-    .wrap{ padding: calc(6px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)); }
-    .logo{ max-width: clamp(180px, 64vw, 280px); margin-top: 4px; } /* smaller logo on phones */
-    .subtitle{ font-size:.95rem; margin: 2px 0 10px; padding: 0 2px; }
+    :root{ --logo-gap:-14px; } /* tighter gap on phones */
+    .wrap{ padding: calc(10px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)); }
+    .logo{ max-width: clamp(180px, 58vw, 260px); margin-top:4px; }
+    .subtitle{ font-size:.95rem; margin:2px 0 10px; }
 
-    .drop{ width:100%; padding:10px 12px; border-radius:16px; }
-    .drop strong{ font-size:.98rem }
-    .click-hint{ font-size:.85rem }
-
-    .hints{ flex-direction:column; gap:4px; align-items:stretch; margin:6px 2px 8px; }
+    .hints{ gap:6px 10px; }  /* stays 2 columns */
     .hint{ font-size:.92rem }
 
     .stats{ flex-direction:column; gap:10px; }
@@ -103,9 +118,6 @@
     .panel{ padding:10px; border-radius:12px; min-height:260px }
     .panel h3{ font-size:1.05rem }
     .list{ height:240px }
-
-    .btns{ margin:14px 0 10px }
-    .btn{ padding:12px 16px }
   }
 </style>
 </head>
