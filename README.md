@@ -58,6 +58,9 @@ Already set up for this repo. If you fork:
 
 Add to Home Screen on iOS/Android or “Install App” in desktop Chrome.
 
-Files tha
+
+📜 License
+
+MIT — do whatever, just don’t hold us liable.
 
 
