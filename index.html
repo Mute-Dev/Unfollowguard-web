@@ -3,6 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UnfollowGuard</title>
+
+<!-- Security headers (meta) -->
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self';
+           script-src 'self' 'unsafe-inline';
+           style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+           font-src https://fonts.gstatic.com;
+           img-src 'self' data:;
+           connect-src 'none';
+           frame-ancestors 'none';
+           base-uri 'self';
+           form-action 'self'">
+<meta name="referrer" content="no-referrer">
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,9 +33,9 @@ if ('serviceWorker' in navigator) {
     --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
     --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
 
-    /* ==== TWEAK THESE FOR THE GAP ==== */
-    --gap-under-logo:-120px;   /* more negative = tighter space under logo */
-    --gap-under-title: 6px;   /* space between big title and subtitle */
+    /* ==== YOUR GAP CONTROLS ==== */
+    --gap-under-logo:-120px; /* more negative = tighter space under logo */
+    --gap-under-title: 6px;  /* (kept for future title use) */
   }
 
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
@@ -84,7 +98,6 @@ if ('serviceWorker' in navigator) {
     :root{ --gap-under-logo:-12px; --gap-under-title:4px; }
     .wrap{padding:calc(0px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
     .logo{max-width:clamp(160px, 48vw, 240px)}
-    .title{font-size:clamp(28px, 8vw, 42px)}
     .subtitle{font-size:.95rem}
 
     /* keep panels side-by-side via horizontal scroll */
@@ -149,6 +162,10 @@ if ('serviceWorker' in navigator) {
   <textarea id="wlText" style="width:100%;min-height:200px;background:#0f111a;border:1px solid #2b2f42;color:#fff;border-radius:10px;padding:10px"></textarea>
   <div class="btns">
     <button id="wlSave" class="btn">Save</button>
+    <button id="wlExport" class="btn secondary">Export</button>
+    <label class="btn secondary" style="cursor:pointer">
+      Import <input id="wlImport" type="file" accept=".txt,.json" hidden>
+    </label>
     <button id="wlClose" class="btn secondary">Close</button>
   </div>
 </div>
@@ -191,17 +208,24 @@ async function loadFiles(fileList){
 
   for (const file of files){
     try{
+      // Large file guard (15 MB)
+      if (file.size > 15 * 1024 * 1024) {
+        statusEl.textContent = `⚠️ ${file.name} is too large; skipped.`;
+        continue;
+      }
       const data = JSON.parse(await file.text());
       const names = usernamesFrom(data);
       if (file.name.toLowerCase().includes('following')) { names.forEach(n=>following.add(n)); gUsed.push(file.name); }
       else { names.forEach(n=>followers.add(n)); fUsed.push(file.name); }
-    }catch(e){}
+    }catch(e){
+      statusEl.textContent = `⚠️ Could not read ${file.name}`;
+    }
   }
   followersHint.textContent = fUsed.length? fUsed.slice(0,2).join(', ') + (fUsed.length>2?' ...':'') : 'none';
   followingHint.textContent = gUsed.length? gUsed.slice(0,2).join(', ') + (gUsed.length>2?' ...':'') : 'none';
   followersCount.textContent = followers.size;
   nfCount.textContent = "0";
-  nfList.innerHTML = ""; ydfbList.innerHTML = "";
+  nfList.textContent = ""; ydfbList.textContent = "";
   statusEl.textContent = `Loaded ${followers.size} followers and ${following.size} following. Click Compare.`;
 }
 
@@ -211,12 +235,22 @@ drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.filter='br
 drop.addEventListener('dragleave', ()=> drop.style.filter='' );
 drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.filter=''; loadFiles(e.dataTransfer.files); });
 
+// Safe list rendering (no innerHTML)
+function renderList(container, items){
+  container.textContent = '';
+  for (const u of items){
+    const row = document.createElement('div');
+    row.textContent = '@' + u;  // textContent = safe
+    container.appendChild(row);
+  }
+}
+
 document.getElementById('compareBtn').addEventListener('click', ()=>{
   const nf   = [...following].filter(u=>!followers.has(u) && !wl.has(u)).sort();
   const ydfb = [...followers].filter(u=>!following.has(u) && !wl.has(u)).sort();
   nfCount.textContent = nf.length;
-  nfList.innerHTML   = nf.map(u=>`<div>@${u}</div>`).join('');
-  ydfbList.innerHTML = ydfb.map(u=>`<div>@${u}</div>`).join('');
+  renderList(nfList, nf);
+  renderList(ydfbList, ydfb);
   statusEl.textContent = `Compare complete. ${nf.length} not following you back, ${ydfb.length} you don’t follow back.`;
 });
 
@@ -224,8 +258,8 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
   const dl = (name, rows)=>{ const blob = new Blob([rows.join('\n')], {type:'text/plain'});
     const url = URL.createObjectURL(blob); const a = Object.assign(document.createElement('a'), {href:url, download:name});
     a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500); };
-  const nf   = Array.from(nfList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,'')); 
-  const ydfb = Array.from(ydfbList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,'')); 
+  const nf   = Array.from(nfList.children).map(d=>d.textContent.replace(/^@/,'')); 
+  const ydfb = Array.from(ydfbList.children).map(d=>d.textContent.replace(/^@/,'')); 
   dl('not_following_you_back.txt', nf);
   dl('you_dont_follow_back.txt', ydfb);
 });
@@ -233,6 +267,7 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
 // Whitelist UI
 const wlModal = document.getElementById('wlModal');
 const wlText  = document.getElementById('wlText');
+
 document.getElementById('wlBtn').addEventListener('click', ()=>{
   wlText.value = Array.from(wl).sort().join('\n');
   wlModal.classList.remove('hidden');
@@ -244,6 +279,27 @@ document.getElementById('wlSave').addEventListener('click', ()=>{
   wlModal.classList.add('hidden');
   statusEl.textContent = `Whitelist saved. ${wl.size} entries.`;
 });
+
+// Whitelist Export / Import
+document.getElementById('wlExport').addEventListener('click', ()=>{
+  const blob = new Blob([Array.from(wl).sort().join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), {href:url, download:'unfollowguard_whitelist.txt'});
+  a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500);
+});
+document.getElementById('wlImport').addEventListener('change', async (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  try{
+    const text = await file.text();
+    wl = new Set(text.split(/\r?\n/).map(s=>norm(s)).filter(Boolean));
+    wlText.value = Array.from(wl).sort().join('\n');
+    localStorage.setItem('UG_whitelist', Array.from(wl).join('\n'));
+    statusEl.textContent = `Whitelist imported. ${wl.size} entries.`;
+  }catch{
+    statusEl.textContent = '⚠️ Unable to import whitelist';
+  }
+});
 </script>
 </body>
 </html>
+
