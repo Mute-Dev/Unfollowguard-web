@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnfollowGuard</title>
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- Kill any previously installed service workers so updates show immediately -->
+<!-- Make sure no old SW keeps stale HTML -->
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
@@ -19,110 +18,110 @@ if ('serviceWorker' in navigator) {
   :root{
     --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
     --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
-    --subtitle-gap-desktop:-18px; /* more negative = tighter */
-    --subtitle-gap-mobile: -10px;
+
+    /* ==== TWEAK THESE FOR THE GAP ==== */
+    --gap-under-logo:-120px;   /* more negative = tighter space under logo */
+    --gap-under-title: 6px;   /* space between big title and subtitle */
   }
+
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
   html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink)}
-  .wrap{
-    max-width:1000px;margin:0 auto;
-    padding: calc(0px + env(safe-area-inset-top)) 22px 22px; /* zero top padding (safe area only) */
-  }
+  .wrap{max-width:1000px;margin:0 auto;padding:calc(0px + env(safe-area-inset-top)) 22px 22px}
 
-  /* --- HERO --- */
+  /* ---------- HERO ---------- */
   .logo{
     display:block;
-    max-width: clamp(300px, 42vw, 520px);
+    max-width:clamp(240px, 32vw, 360px);
     height:auto;
-    margin: 0 auto 0 auto;                 /* no space above or below by default */
+    margin:0 auto var(--gap-under-logo) auto !important;   /* no space above, tight below */
   }
   .subtitle{
-    color:var(--muted);
-    text-align:center;
-    margin: var(--subtitle-gap-desktop) 0 12px !important;  /* forcibly pull up under logo */
-    line-height:1.35;
+    color:var(--muted);text-align:center;margin:0 0 12px !important;line-height:1.35;
   }
 
-  /* --- DROP / CLICK --- */
-  .drop{margin:0 auto 12px;width:min(720px,92%);background:rgba(43,47,66,.7);backdrop-filter:blur(8px);
-        border:1px solid #6f7391;border-radius:20px;padding:12px 14px;text-align:center;cursor:pointer;transition:.15s}
+  /* ---------- DROP / CLICK ---------- */
+  .centered{width:min(720px,92%);margin:0 auto}
+  .drop{
+    background:rgba(43,47,66,.7);backdrop-filter:blur(8px);
+    border:1px solid #6f7391;border-radius:20px;padding:12px 14px;text-align:center;cursor:pointer;transition:.15s
+  }
   .drop:hover{filter:brightness(1.04)}
   .click-hint{color:var(--muted);font-size:.9rem;margin-top:2px}
   .hidden{display:none}
 
-  /* --- HINTS: ALWAYS 2 COLUMNS --- */
+  /* ---------- HINTS (ALIGNED UNDER DROP, SIDE-BY-SIDE) ---------- */
   .hints{
-    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:8px 16px; align-items:center; justify-items:start; margin:6px 0 8px;
+    width:min(720px,92%);margin:8px auto 6px;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:6px 16px;align-items:center
   }
-  .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;line-height:1;white-space:nowrap}
+  .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;white-space:nowrap}
   .hint .val{color:#cfd1da;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .hint.right{justify-self:end} /* right cell aligns to the right edge */
 
-  /* --- STATS --- */
-  .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:6px 0 8px;flex-wrap:wrap}
+  /* ---------- STATS ---------- */
+  .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:8px auto;flex-wrap:wrap;width:min(720px,92%)}
   .chip{background:var(--chip);padding:10px 14px;border-radius:12px;min-width:260px;
         display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line)}
-  .chip .k{opacity:.9}
-  .chip .v{font-weight:700}
+  .chip .k{opacity:.9}.chip .v{font-weight:700}
 
-  /* --- PANELS --- */
+  /* ---------- PANELS ---------- */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .panel{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);
-         border-radius:14px;padding:12px;flex:1 1 420px;min-height:320px}
+         border-radius:14px;padding:12px;min-height:320px;min-width:0}
   .panel h3{margin:0 0 6px}
   .list{height:260px;overflow:auto;background:#0f111a;border-radius:10px;padding:10px}
 
-  /* --- BUTTONS --- */
+  /* ---------- BUTTONS ---------- */
   .btns{display:flex;gap:10px;justify-content:center;margin:12px 0 8px;flex-wrap:wrap}
   .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer}
   .btn.secondary{background:#3b3f56}
-
-  /* --- FOOTER --- */
   .footer{color:var(--muted);text-align:center;margin:8px 0 24px}
 
   /* ---------- MOBILE ---------- */
-  @media (max-width:600px){
-    .wrap{ padding: calc(0px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)); }
-    .logo{ max-width: clamp(180px, 58vw, 260px); margin: 0 auto 0 auto; }
-    .subtitle{ margin: var(--subtitle-gap-mobile) 0 10px !important; font-size:.95rem; }
-    .hints{ gap:6px 10px; }
-    .hint{ font-size:.92rem }
-    .stats{ flex-direction:column; gap:10px; }
-    .chip{ width:100%; min-width:0; padding:12px 14px; }
-    .panel{ padding:10px; border-radius:12px; min-height:260px }
-    .panel h3{ font-size:1.05rem }
-    .list{ height:240px }
-    .btns{ margin:14px 0 10px }
-    .btn{ padding:12px 16px }
+  @media (max-width:700px){
+    :root{ --gap-under-logo:-12px; --gap-under-title:4px; }
+    .wrap{padding:calc(0px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
+    .logo{max-width:clamp(160px, 48vw, 240px)}
+    .title{font-size:clamp(28px, 8vw, 42px)}
+    .subtitle{font-size:.95rem}
+
+    /* keep panels side-by-side via horizontal scroll */
+    .row{display:grid;grid-auto-flow:column;grid-auto-columns:min(88vw,480px);gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+    .panel{min-height:260px}.list{height:240px}
+
+    .stats{flex-direction:column;gap:10px;width:100%}
+    .chip{width:100%;min-width:0;padding:12px 14px}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- Logo + subtitle -->
-  <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard" />
+  <!-- HERO -->
+  <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo" />
   <p class="subtitle">Analyze Instagram exports. Compare followers &amp; following, whitelist brands, and export results.</p>
 
-  <!-- Drop + click -->
-  <div id="drop" class="drop">
+  <!-- DROP + CLICK -->
+  <div id="drop" class="drop centered">
     <div><strong>Drag &amp; drop followers_*.json + following.json here</strong></div>
     <div class="click-hint">or <u><strong>click here</strong></u> to select your files</div>
     <input id="picker" type="file" accept=".json" multiple class="hidden" />
   </div>
 
-  <!-- Hints -->
+  <!-- HINTS (SIDE BY SIDE + ALIGNED) -->
   <div class="hints">
     <div class="hint">Followers files: <span class="val" id="followersHint">none</span></div>
-    <div class="hint">Following files: <span class="val" id="followingHint">none</span></div>
+    <div class="hint right">Following files: <span class="val" id="followingHint">none</span></div>
   </div>
 
-  <!-- Stats -->
+  <!-- STATS -->
   <div class="stats">
     <div class="chip"><span class="k">Followers</span><span class="v" id="followersCount">0</span></div>
     <div class="chip"><span class="k">Not Following You Back</span><span class="v" id="nfCount">0</span></div>
   </div>
 
-  <!-- Results -->
+  <!-- RESULTS -->
   <div class="row">
     <div class="panel">
       <h3>Not Following You Back</h3>
@@ -134,7 +133,7 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 
-  <!-- Actions -->
+  <!-- ACTIONS -->
   <div class="btns">
     <button id="compareBtn" class="btn">Compare Now</button>
     <button id="exportBtn" class="btn secondary">Export Results</button>
@@ -144,10 +143,10 @@ if ('serviceWorker' in navigator) {
   <p id="status" class="footer">Ready.</p>
 </div>
 
-<!-- Whitelist modal -->
+<!-- WHITELIST MODAL -->
 <div id="wlModal" class="hidden wrap" style="max-width:720px">
   <h2>Whitelist (one username per line)</h2>
-  <textarea id="wlText" class="whitelist"></textarea>
+  <textarea id="wlText" style="width:100%;min-height:200px;background:#0f111a;border:1px solid #2b2f42;color:#fff;border-radius:10px;padding:10px"></textarea>
   <div class="btns">
     <button id="wlSave" class="btn">Save</button>
     <button id="wlClose" class="btn secondary">Close</button>
@@ -172,11 +171,16 @@ function norm(s){ return s.trim().toLowerCase().replace(/^@/,''); }
 function usernamesFrom(json){
   function fromArr(arr){ const out=new Set(); for(const e of arr||[]) {
     const sld = e?.string_list_data?.[0];
-    if(sld?.value) out.add(norm(sld.value));
-    else if(sld?.href){ try{ const u = new URL(sld.href); const first = u.pathname.replace(/^\/+/,'').split('/')[0]; if(first) out.add(norm(first)); } catch{} }
+    if (sld?.value) out.add(norm(sld.value));
+    else if (sld?.href){ try{
+      const u = new URL(sld.href);
+      const first = u.pathname.replace(/^\/+/,'').split('/')[0];
+      if(first) out.add(norm(first));
+    }catch{} }
   } return out; }
-  if(Array.isArray(json)) return fromArr(json);
-  for(const k of ["relationships_followers","relationships_following","followers","following"]) if(json?.[k]) return fromArr(json[k]);
+  if (Array.isArray(json)) return fromArr(json);
+  for (const k of ["relationships_followers","relationships_following","followers","following"])
+    if (json?.[k]) return fromArr(json[k]);
   return new Set();
 }
 
@@ -185,12 +189,11 @@ async function loadFiles(fileList){
   const files = Array.from(fileList);
   followers.clear(); following.clear();
 
-  for(const file of files){
+  for (const file of files){
     try{
-      const txt = await file.text();
-      const data = JSON.parse(txt);
+      const data = JSON.parse(await file.text());
       const names = usernamesFrom(data);
-      if(file.name.toLowerCase().includes('following')) { names.forEach(n=>following.add(n)); gUsed.push(file.name); }
+      if (file.name.toLowerCase().includes('following')) { names.forEach(n=>following.add(n)); gUsed.push(file.name); }
       else { names.forEach(n=>followers.add(n)); fUsed.push(file.name); }
     }catch(e){}
   }
@@ -206,27 +209,25 @@ drop.addEventListener('click', ()=> picker.click());
 picker.addEventListener('change', e => loadFiles(e.target.files));
 drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.filter='brightness(1.06)' });
 drop.addEventListener('dragleave', ()=> drop.style.filter='' );
-drop.addEventListener('drop', e=>{
-  e.preventDefault(); drop.style.filter='';
-  loadFiles(e.dataTransfer.files);
-});
+drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.filter=''; loadFiles(e.dataTransfer.files); });
 
 document.getElementById('compareBtn').addEventListener('click', ()=>{
-  const nf = [...following].filter(u=>!followers.has(u) && !wl.has(u)).sort();
+  const nf   = [...following].filter(u=>!followers.has(u) && !wl.has(u)).sort();
   const ydfb = [...followers].filter(u=>!following.has(u) && !wl.has(u)).sort();
   nfCount.textContent = nf.length;
-  nfList.innerHTML = nf.map(u=>`<div>@${u}</div>`).join('');
+  nfList.innerHTML   = nf.map(u=>`<div>@${u}</div>`).join('');
   ydfbList.innerHTML = ydfb.map(u=>`<div>@${u}</div>`).join('');
   statusEl.textContent = `Compare complete. ${nf.length} not following you back, ${ydfb.length} you don’t follow back.`;
 });
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
-  function download(name, rows){ const blob = new Blob([rows.join('\n')], {type:'text/plain'}); const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement('a'), {href:url, download:name}); a.click(); setTimeout(()=>URL.revokeObjectURL(url), 1000); }
-  const nf = Array.from(nfList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,''));
-  const ydfb = Array.from(ydfbList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,''));
-  download('not_following_you_back.txt', nf);
-  download('you_dont_follow_back.txt', ydfb);
+  const dl = (name, rows)=>{ const blob = new Blob([rows.join('\n')], {type:'text/plain'});
+    const url = URL.createObjectURL(blob); const a = Object.assign(document.createElement('a'), {href:url, download:name});
+    a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500); };
+  const nf   = Array.from(nfList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,'')); 
+  const ydfb = Array.from(ydfbList.querySelectorAll('div')).map(d=>d.textContent.replace(/^@/,'')); 
+  dl('not_following_you_back.txt', nf);
+  dl('you_dont_follow_back.txt', ydfb);
 });
 
 // Whitelist UI
