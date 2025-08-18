@@ -141,6 +141,117 @@ if ('serviceWorker' in navigator) {
     .brand-badge img{width:36px;height:36px}
   }
 </style>
+<style>
+  /* A2HS overlay — uses your existing CSS variables */
+  #a2hsOverlay{position:fixed;inset:0;display:none;place-items:center;
+    background:rgba(8,10,18,.55);backdrop-filter:blur(6px);z-index:9999}
+  .a2hs-card{width:min(420px,92%);background:rgba(23,26,37,.95);
+    border:1px solid var(--line);border-radius:18px;padding:16px 16px 14px}
+  .a2hs-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .a2hs-logo{width:38px;height:38px;object-fit:contain}
+  .a2hs-title{font-size:1.15rem;font-weight:800;margin:0}
+  .a2hs-body{color:var(--muted);font-size:.98rem;line-height:1.5;margin:8px 0 12px}
+  .a2hs-row{display:flex;gap:8px;align-items:center;background:#141827;
+    border:1px dashed #3a3f5f;border-radius:12px;padding:10px 12px;margin:8px 0}
+  .a2hs-ico{font-size:18px;opacity:.9}
+  .a2hs-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+  .a2hs-btn{background:var(--accent);color:#fff;border:0;border-radius:999px;
+    padding:10px 14px;font-weight:700;cursor:pointer}
+  .a2hs-btn.secondary{background:#3b3f56}
+</style>
+
+<div id="a2hsOverlay" aria-hidden="true">
+  <div class="a2hs-card" role="dialog" aria-modal="true" aria-labelledby="a2hsTitle">
+    <div class="a2hs-head">
+      <img class="a2hs-logo" src="/favicon-32.png" alt="UnfollowGuard">
+      <h3 class="a2hs-title" id="a2hsTitle">Install UnfollowGuard</h3>
+    </div>
+
+    <!-- Android text (replaced for iOS at runtime) -->
+    <div class="a2hs-body" id="a2hsText">
+      Add UnfollowGuard to your home screen for one-tap access.
+    </div>
+
+    <!-- iOS instruction row (hidden on Android) -->
+    <div class="a2hs-row" id="iosRow" style="display:none">
+      <span class="a2hs-ico">⬆️</span>
+      <div>Tap <b>Share</b>, then choose <b>Add to Home Screen</b>.</div>
+    </div>
+
+    <div class="a2hs-actions" id="a2hsBtns">
+      <button class="a2hs-btn secondary" id="a2hsDismiss">Not now</button>
+      <button class="a2hs-btn" id="a2hsInstall">Install</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const overlay = document.getElementById('a2hsOverlay');
+  const iosRow  = document.getElementById('iosRow');
+  const textEl  = document.getElementById('a2hsText');
+  const btns    = document.getElementById('a2hsBtns');
+  const btnInstall = document.getElementById('a2hsInstall');
+  const btnDismiss = document.getElementById('a2hsDismiss');
+
+  // ---- show/hide helpers ----
+  const open = () => { overlay.style.display='grid'; overlay.setAttribute('aria-hidden','false'); };
+  const close = (rememberDays=14) => {
+    overlay.style.display='none'; overlay.setAttribute('aria-hidden','true');
+    localStorage.setItem('UG_a2hs_dismiss_until', String(Date.now() + rememberDays*864e5));
+  };
+  btnDismiss.addEventListener('click', ()=> close());
+
+  // ---- iOS detect (no programmatic prompt on Safari iOS) ----
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const inStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                       || ('standalone' in navigator && navigator.standalone);
+
+  // throttle re-showing
+  const notBefore = Number(localStorage.getItem('UG_a2hs_dismiss_until')||0);
+  if (Date.now() < notBefore) return;
+
+  // ---- Android/Chrome: use beforeinstallprompt ----
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Android UI
+    iosRow.style.display = 'none';
+    btnInstall.style.display='inline-flex';
+    textEl.textContent = 'Add UnfollowGuard to your home screen for one-tap access.';
+    open();
+  });
+
+  btnInstall.addEventListener('click', async () => {
+    if (!deferredPrompt) { close(); return; }
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch {}
+    deferredPrompt = null;
+    close(365); // don’t bug again for a while
+  });
+
+  // ---- iOS: show a nice instruction sheet ----
+  function maybeShowIOSGuide() {
+    if (!isIOS || inStandalone) return;
+    iosRow.style.display = 'flex';
+    btnInstall.style.display = 'none';
+    textEl.innerHTML = 'Install UnfollowGuard on your home screen for fast access.';
+    open();
+  }
+
+  // Show after a small delay or first interaction (feels less spammy)
+  setTimeout(maybeShowIOSGuide, 1800);
+  window.addEventListener('scroll', maybeShowIOSGuide, { once:true });
+  window.addEventListener('click',  maybeShowIOSGuide, { once:true });
+
+  // ---- minimal SW so Android install criteria is met ----
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw-a2hs.js').catch(()=>{});
+  }
+})();
+</script>
+
 </head>
 <body>
 <div class="wrap">
