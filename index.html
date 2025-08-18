@@ -18,6 +18,8 @@
            form-action 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b0d16" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 <!-- Social preview -->
 <meta property="og:title" content="UnfollowGuard — How it works" />
@@ -63,7 +65,7 @@
   .subtitle{color:var(--muted);text-align:center;max-width:780px;margin:0 0 14px;line-height:1.45}
   .bsafe{display:flex;gap:8px;align-items:center;margin:6px 0 18px}
   .bsafe .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
-  .cta{display:flex;gap:-20px;flex-wrap:wrap;justify-content:center;margin:8px 0 22px}
+  .cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 22px}
 
   /* Sections */
   .section-title{font-size:1.35rem;margin:14px 0 8px}
@@ -97,8 +99,7 @@
 
   @media (max-width:950px){ .grid{grid-template-columns:1fr} .logo{width:min(260px,48vw)} }
   @media (max-width:560px){ .wrap{padding:calc(8px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))} }
-</style>
-<style>
+
   /* A2HS overlay — uses your existing CSS variables */
   #a2hsOverlay{position:fixed;inset:0;display:none;place-items:center;
     background:rgba(8,10,18,.55);backdrop-filter:blur(6px);z-index:9999}
@@ -116,99 +117,6 @@
     padding:10px 14px;font-weight:700;cursor:pointer}
   .a2hs-btn.secondary{background:#3b3f56}
 </style>
-
-<div id="a2hsOverlay" aria-hidden="true">
-  <div class="a2hs-card" role="dialog" aria-modal="true" aria-labelledby="a2hsTitle">
-    <div class="a2hs-head">
-      <img class="a2hs-logo" src="/favicon-32.png" alt="UnfollowGuard">
-      <h3 class="a2hs-title" id="a2hsTitle">Install UnfollowGuard</h3>
-    </div>
-
-    <!-- Android text (replaced for iOS at runtime) -->
-    <div class="a2hs-body" id="a2hsText">
-      Add UnfollowGuard to your home screen for one-tap access.
-    </div>
-
-    <!-- iOS instruction row (hidden on Android) -->
-    <div class="a2hs-row" id="iosRow" style="display:none">
-      <span class="a2hs-ico">⬆️</span>
-      <div>Tap <b>Share</b>, then choose <b>Add to Home Screen</b>.</div>
-    </div>
-
-    <div class="a2hs-actions" id="a2hsBtns">
-      <button class="a2hs-btn secondary" id="a2hsDismiss">Not now</button>
-      <button class="a2hs-btn" id="a2hsInstall">Install</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const overlay = document.getElementById('a2hsOverlay');
-  const iosRow  = document.getElementById('iosRow');
-  const textEl  = document.getElementById('a2hsText');
-  const btns    = document.getElementById('a2hsBtns');
-  const btnInstall = document.getElementById('a2hsInstall');
-  const btnDismiss = document.getElementById('a2hsDismiss');
-
-  // ---- show/hide helpers ----
-  const open = () => { overlay.style.display='grid'; overlay.setAttribute('aria-hidden','false'); };
-  const close = (rememberDays=14) => {
-    overlay.style.display='none'; overlay.setAttribute('aria-hidden','true');
-    localStorage.setItem('UG_a2hs_dismiss_until', String(Date.now() + rememberDays*864e5));
-  };
-  btnDismiss.addEventListener('click', ()=> close());
-
-  // ---- iOS detect (no programmatic prompt on Safari iOS) ----
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const inStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                       || ('standalone' in navigator && navigator.standalone);
-
-  // throttle re-showing
-  const notBefore = Number(localStorage.getItem('UG_a2hs_dismiss_until')||0);
-  if (Date.now() < notBefore) return;
-
-  // ---- Android/Chrome: use beforeinstallprompt ----
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Android UI
-    iosRow.style.display = 'none';
-    btnInstall.style.display='inline-flex';
-    textEl.textContent = 'Add UnfollowGuard to your home screen for one-tap access.';
-    open();
-  });
-
-  btnInstall.addEventListener('click', async () => {
-    if (!deferredPrompt) { close(); return; }
-    deferredPrompt.prompt();
-    try { await deferredPrompt.userChoice; } catch {}
-    deferredPrompt = null;
-    close(365); // don’t bug again for a while
-  });
-
-  // ---- iOS: show a nice instruction sheet ----
-  function maybeShowIOSGuide() {
-    if (!isIOS || inStandalone) return;
-    iosRow.style.display = 'flex';
-    btnInstall.style.display = 'none';
-    textEl.innerHTML = 'Install UnfollowGuard on your home screen for fast access.';
-    open();
-  }
-
-  // Show after a small delay or first interaction (feels less spammy)
-  setTimeout(maybeShowIOSGuide, 1800);
-  window.addEventListener('scroll', maybeShowIOSGuide, { once:true });
-  window.addEventListener('click',  maybeShowIOSGuide, { once:true });
-
-  // ---- minimal SW so Android install criteria is met ----
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw-a2hs.js').catch(()=>{});
-  }
-})();
-</script>
-
 </head>
 <body>
 <div class="wrap">
@@ -310,6 +218,27 @@
 
 </div>
 
+<!-- A2HS OVERLAY (moved out of <head>) -->
+<div id="a2hsOverlay" aria-hidden="true" style="display:none;place-items:center;">
+  <div class="a2hs-card" role="dialog" aria-modal="true" aria-labelledby="a2hsTitle">
+    <div class="a2hs-head">
+      <img class="a2hs-logo" src="/favicon-32.png" alt="UnfollowGuard">
+      <h3 class="a2hs-title" id="a2hsTitle">Install UnfollowGuard</h3>
+    </div>
+    <div class="a2hs-body" id="a2hsText">
+      Add UnfollowGuard to your home screen for one-tap access.
+    </div>
+    <div class="a2hs-row" id="iosRow" style="display:none">
+      <span class="a2hs-ico">⬆️</span>
+      <div>Tap <b>Share</b>, then choose <b>Add to Home Screen</b>.</div>
+    </div>
+    <div class="a2hs-actions">
+      <button class="a2hs-btn secondary" id="a2hsDismiss">Not now</button>
+      <button class="a2hs-btn" id="a2hsInstall">Install</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Tabs: Mobile / Desktop
   const tabs = document.querySelectorAll('.tab');
@@ -325,8 +254,100 @@
   // Year
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
+
+<script>
+/* =======================
+   A2HS (gentle scheduler)
+   ======================= */
+(function(){
+  const overlay = document.getElementById('a2hsOverlay');
+  const iosRow  = document.getElementById('iosRow');
+  const textEl  = document.getElementById('a2hsText');
+  const btnInstall = document.getElementById('a2hsInstall');
+  const btnDismiss = document.getElementById('a2hsDismiss');
+
+  // knobs
+  const PROMPT_DELAY_MS = 45000;   // 45s after first interaction
+  const REQUIRE_INTERACTION = true;
+  const SECOND_VISIT_ONLY = true;
+  const COOLDOWN_DAYS = 14;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const inStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                       || ('standalone' in navigator && navigator.standalone);
+
+  const kSeen = 'UG_seen_once';
+  const kCooldown = 'UG_a2hs_dismiss_until';
+  let deferredPrompt = null;
+
+  // helpers
+  const open = () => { overlay.style.display='grid'; overlay.setAttribute('aria-hidden','false'); };
+  const close = (rememberDays=COOLDOWN_DAYS) => {
+    overlay.style.display='none'; overlay.setAttribute('aria-hidden','true');
+    localStorage.setItem(kCooldown, String(Date.now() + rememberDays*864e5));
+  };
+  btnDismiss.addEventListener('click', ()=> close());
+
+  function cooledDown(){ return Date.now() > (+localStorage.getItem(kCooldown) || 0); }
+  function isFirstVisit(){
+    if (!sessionStorage.getItem(kSeen)) { sessionStorage.setItem(kSeen,'1'); return true; }
+    return false;
+  }
+  function waitForInteraction(){
+    return new Promise(res=>{
+      if (!REQUIRE_INTERACTION) return res();
+      const once = ()=>{ ['click','keydown','scroll','touchstart','pointerdown'].forEach(ev=>window.removeEventListener(ev, once)); res(); };
+      ['click','keydown','scroll','touchstart','pointerdown'].forEach(ev=>window.addEventListener(ev, once, { once:true, passive:true }));
+    });
+  }
+  function schedule(fn){
+    if (SECOND_VISIT_ONLY && isFirstVisit()) return;
+    if (!cooledDown()) return;
+    waitForInteraction().then(()=> setTimeout(fn, PROMPT_DELAY_MS));
+  }
+
+  // Android / Chrome: we need the event to appear
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    schedule(()=>{
+      iosRow.style.display = 'none';
+      btnInstall.style.display = 'inline-flex';
+      textEl.textContent = 'Add UnfollowGuard to your home screen for one-tap access.';
+      open();
+    });
+  });
+
+  btnInstall.addEventListener('click', async () => {
+    if (!deferredPrompt) { close(); return; }
+    try{
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome !== 'accepted') close(COOLDOWN_DAYS);
+      else close(365);
+    }catch{ close(); }
+    deferredPrompt = null;
+  });
+
+  // iOS Safari: show instructions (no native prompt)
+  if (isIOS && !inStandalone){
+    schedule(()=>{
+      iosRow.style.display = 'flex';
+      btnInstall.style.display = 'none';
+      textEl.innerHTML = 'Install UnfollowGuard on your home screen for fast access.';
+      open();
+    });
+  }
+
+  // minimal SW so Android install criteria is met
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw-a2hs.js', { scope: '/' }).catch(()=>{});
+  }
+})();
+</script>
 </body>
 </html>
+
 
 
 
