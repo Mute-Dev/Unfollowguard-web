@@ -1,10 +1,11 @@
 ﻿<p align="center">
   <a href="https://www.unfollowguard.com">
-    <img src="assets/social-card-1200x630.png"
+    <img src="social-card-1200x630.png"
          alt="Unfollow Guard — Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — locally."
          width="100%" />
   </a>
 </p>
+
 
 
 **Privacy-first Instagram follower auditor** — compare your *Followers* vs *Following*, whitelist brands/creators, and export results.  
