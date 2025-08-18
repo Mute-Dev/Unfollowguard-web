@@ -59,8 +59,7 @@
 
   /* Hero */
   .hero{display:flex;flex-direction:column;align-items:center;margin:8px 0 18px}
-  .logo{width:min(360px,32vw);height:auto}
-  .title{font-size:clamp(36px,6vw,60px);font-weight:800;margin:8px 0 4px}
+  .logo{width:min(360px,32vw);height:auto;margin-bottom:8px} /* tight space under logo */
   .subtitle{color:var(--muted);text-align:center;max-width:780px;margin:0 0 14px;line-height:1.45}
   .bsafe{display:flex;gap:8px;align-items:center;margin:6px 0 18px}
   .bsafe .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
@@ -85,11 +84,10 @@
   .finder{background:#111320;border:1px dashed #3a3f5f;border-radius:12px;padding:10px 12px;color:#cfd1da}
   .finder code{color:#e9eaf0}
 
-  /* FAQ */
+  /* FAQ / Footer */
   details{background:rgba(23,26,37,.78);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
   summary{cursor:pointer;font-weight:600}
 
-  /* Divider + brand */
   .divider{border:0;border-top:1px solid var(--line);width:min(780px,92%);margin:26px auto 18px}
   .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px}
   .brand-badge{display:inline-flex;align-items:center;gap:12px;background:rgba(36,39,58,.7);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-decoration:none}
@@ -111,10 +109,9 @@
 
   <section class="hero">
     <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo">
-    <h1 class="title">UnfollowGuard</h1>
     <p class="subtitle">
       Check who doesn’t follow you back (and who you don’t follow back) using your Instagram export.
-      Everything runs **locally** in your browser—no logins, no servers.
+      Everything runs <b>locally</b> in your browser—no logins, no servers.
     </p>
     <div class="bsafe"><span class="dot"></span> <span class="small">100% privacy-first • files never leave your device</span></div>
     <div class="cta">
@@ -219,5 +216,6 @@
 </script>
 </body>
 </html>
+
 
 
