@@ -1,4 +1,11 @@
-﻿# UnfollowGuard (Web)
+﻿<p align="center">
+  <a href="https://www.unfollowguard.com">
+    <img src="assets/social-card-1200x630-v7-unfollow-guard.png"
+         alt="Unfollow Guard — Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — locally."
+         width="100%" />
+  </a>
+</p>
+
 
 **Privacy-first Instagram follower auditor** — compare your *Followers* vs *Following*, whitelist brands/creators, and export results.  
 Runs entirely in your browser. No logins. No servers. No tracking.
