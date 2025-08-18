@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UnfollowGuard — App</title>
 
-<!-- Security headers (meta) -->
 <meta http-equiv="Content-Security-Policy"
   content="default-src 'self';
            script-src 'self' 'unsafe-inline';
@@ -19,270 +18,86 @@
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b0d16" />
 
-<!-- Social preview (Open Graph / Twitter) -->
-<meta property="og:title" content="UnfollowGuard" />
-<meta property="og:description" content="Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — all in your browser." />
-<meta property="og:url" content="https://www.unfollowguard.com/app.html" />
-<meta property="og:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="UnfollowGuard" />
-<meta name="twitter:description" content="Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — all in your browser." />
-<meta name="twitter:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
-
-<!-- Icons -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-<link rel="manifest" href="/site.webmanifest">
-
+<link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-<!-- Make sure no old SW keeps stale HTML -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-}
-</script>
 
 <style>
   :root{
     --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
     --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
-
-    /* ==== YOUR GAP CONTROLS ==== */
-    --gap-under-logo:-120px; /* more negative = tighter space under logo */
-    --gap-under-title: 6px;  /* (kept for future title use) */
+    --gap-under-logo:-120px;
   }
-
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
   html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink)}
-  .wrap{max-width:1000px;margin:0 auto;padding:calc(0px + env(safe-area-inset-top)) 22px 22px}
+  .wrap{max-width:1000px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 22px 22px}
 
-  /* tiny top nav */
-  .topbar{display:flex;justify-content:flex-end;margin-top:8px}
-  .btnlink{background:#3b3f56;color:#fff;border:0;border-radius:999px;padding:8px 12px;font-weight:600;text-decoration:none}
+  .logo{display:block;max-width:clamp(240px, 32vw, 360px);height:auto;margin:0 auto var(--gap-under-logo) auto}
+  .subtitle{color:var(--muted);text-align:center;margin:0 0 12px;line-height:1.35}
 
-  /* ---------- HERO ---------- */
-  .logo{
-    display:block;
-    max-width:clamp(240px, 32vw, 360px);
-    height:auto;
-    margin:0 auto var(--gap-under-logo) auto !important;
-  }
-  .subtitle{
-    color:var(--muted);text-align:center;margin:0 0 12px !important;line-height:1.35;
-  }
-
-  /* ---------- DROP / CLICK ---------- */
   .centered{width:min(720px,92%);margin:0 auto}
-  .drop{
-    background:rgba(43,47,66,.7);backdrop-filter:blur(8px);
-    border:1px solid #6f7391;border-radius:20px;padding:12px 14px;text-align:center;cursor:pointer;transition:.15s
-  }
+  .drop{background:rgba(43,47,66,.7);backdrop-filter:blur(8px);border:1px solid #6f7391;border-radius:20px;padding:12px 14px;text-align:center;cursor:pointer;transition:.15s}
   .drop:hover{filter:brightness(1.04)}
   .click-hint{color:var(--muted);font-size:.9rem;margin-top:2px}
-  .hidden{display:none}
+  .micro{color:#aeb1bf;font-size:.85rem;margin-top:6px}
 
-  /* ---------- HINTS ---------- */
-  .hints{
-    width:min(720px,92%);margin:8px auto 6px;
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:6px 16px;align-items:center
-  }
+  .hidden{display:none}
+  .hints{width:min(720px,92%);margin:8px auto 6px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 16px;align-items:center}
   .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;white-space:nowrap}
   .hint .val{color:#cfd1da;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .hint.right{justify-self:end}
 
-  /* ---------- STATS ---------- */
   .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:8px auto;flex-wrap:wrap;width:min(720px,92%)}
-  .chip{background:var(--chip);padding:10px 14px;border-radius:12px;min-width:260px;
-        display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line)}
+  .chip{background:var(--chip);padding:10px 14px;border-radius:12px;min-width:260px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line)}
   .chip .k{opacity:.9}.chip .v{font-weight:700}
 
-  /* ---------- PANELS ---------- */
   .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .panel{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);
-         border-radius:14px;padding:12px;min-height:320px;min-width:0}
+  .panel{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:320px;min-width:0}
   .panel h3{margin:0 0 6px}
   .list{height:260px;overflow:auto;background:#0f111a;border-radius:10px;padding:10px}
 
-  /* ---------- BUTTONS ---------- */
   .btns{display:flex;gap:10px;justify-content:center;margin:12px 0 8px;flex-wrap:wrap}
   .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer}
   .btn.secondary{background:#3b3f56}
   .footer{color:var(--muted);text-align:center;margin:8px 0 24px}
+  .demo-badge{display:none;color:#cfd1ff;background:rgba(108,99,255,.18);border:1px solid rgba(108,99,255,.4);border-radius:999px;padding:6px 10px;font-size:.85rem;margin:0 auto 6px;width:max-content}
 
-  /* ---------- BRAND FOOTER ---------- */
-  .divider{border:0;border-top:1px solid var(--line);width:min(720px,92%);margin:22px auto}
-  .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 0}
-  .brand-badge{display:inline-flex;align-items:center;gap:12px;background:rgba(36,39,58,.7);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-decoration:none}
-  .brand-badge img{width:40px;height:40px;object-fit:contain}
-  .brand-name{font-weight:700}
-  .brand-tag{color:var(--muted);font-size:.9rem}
-
-  /* ---------- MOBILE ---------- */
   @media (max-width:700px){
-    :root{ --gap-under-logo:-12px; --gap-under-title:4px; }
+    :root{ --gap-under-logo:-12px; }
     .wrap{padding:calc(0px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
     .logo{max-width:clamp(160px, 48vw, 240px)}
-    .subtitle{font-size:.95rem}
-
-    .row{display:grid;grid-auto-flow:column;grid-auto-columns:min(88vw,480px);gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+    .row{grid-auto-flow:column;grid-auto-columns:min(88vw,480px);gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
     .panel{min-height:260px}.list{height:240px}
-
     .stats{flex-direction:column;gap:10px;width:100%}
     .chip{width:100%;min-width:0;padding:12px 14px}
-
-    .brand-badge img{width:36px;height:36px}
   }
 </style>
-<style>
-  /* A2HS overlay — uses your existing CSS variables */
-  #a2hsOverlay{position:fixed;inset:0;display:none;place-items:center;
-    background:rgba(8,10,18,.55);backdrop-filter:blur(6px);z-index:9999}
-  .a2hs-card{width:min(420px,92%);background:rgba(23,26,37,.95);
-    border:1px solid var(--line);border-radius:18px;padding:16px 16px 14px}
-  .a2hs-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-  .a2hs-logo{width:38px;height:38px;object-fit:contain}
-  .a2hs-title{font-size:1.15rem;font-weight:800;margin:0}
-  .a2hs-body{color:var(--muted);font-size:.98rem;line-height:1.5;margin:8px 0 12px}
-  .a2hs-row{display:flex;gap:8px;align-items:center;background:#141827;
-    border:1px dashed #3a3f5f;border-radius:12px;padding:10px 12px;margin:8px 0}
-  .a2hs-ico{font-size:18px;opacity:.9}
-  .a2hs-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
-  .a2hs-btn{background:var(--accent);color:#fff;border:0;border-radius:999px;
-    padding:10px 14px;font-weight:700;cursor:pointer}
-  .a2hs-btn.secondary{background:#3b3f56}
-</style>
-
-<div id="a2hsOverlay" aria-hidden="true">
-  <div class="a2hs-card" role="dialog" aria-modal="true" aria-labelledby="a2hsTitle">
-    <div class="a2hs-head">
-      <img class="a2hs-logo" src="/favicon-32.png" alt="UnfollowGuard">
-      <h3 class="a2hs-title" id="a2hsTitle">Install UnfollowGuard</h3>
-    </div>
-
-    <!-- Android text (replaced for iOS at runtime) -->
-    <div class="a2hs-body" id="a2hsText">
-      Add UnfollowGuard to your home screen for one-tap access.
-    </div>
-
-    <!-- iOS instruction row (hidden on Android) -->
-    <div class="a2hs-row" id="iosRow" style="display:none">
-      <span class="a2hs-ico">⬆️</span>
-      <div>Tap <b>Share</b>, then choose <b>Add to Home Screen</b>.</div>
-    </div>
-
-    <div class="a2hs-actions" id="a2hsBtns">
-      <button class="a2hs-btn secondary" id="a2hsDismiss">Not now</button>
-      <button class="a2hs-btn" id="a2hsInstall">Install</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const overlay = document.getElementById('a2hsOverlay');
-  const iosRow  = document.getElementById('iosRow');
-  const textEl  = document.getElementById('a2hsText');
-  const btns    = document.getElementById('a2hsBtns');
-  const btnInstall = document.getElementById('a2hsInstall');
-  const btnDismiss = document.getElementById('a2hsDismiss');
-
-  // ---- show/hide helpers ----
-  const open = () => { overlay.style.display='grid'; overlay.setAttribute('aria-hidden','false'); };
-  const close = (rememberDays=14) => {
-    overlay.style.display='none'; overlay.setAttribute('aria-hidden','true');
-    localStorage.setItem('UG_a2hs_dismiss_until', String(Date.now() + rememberDays*864e5));
-  };
-  btnDismiss.addEventListener('click', ()=> close());
-
-  // ---- iOS detect (no programmatic prompt on Safari iOS) ----
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const inStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                       || ('standalone' in navigator && navigator.standalone);
-
-  // throttle re-showing
-  const notBefore = Number(localStorage.getItem('UG_a2hs_dismiss_until')||0);
-  if (Date.now() < notBefore) return;
-
-  // ---- Android/Chrome: use beforeinstallprompt ----
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Android UI
-    iosRow.style.display = 'none';
-    btnInstall.style.display='inline-flex';
-    textEl.textContent = 'Add UnfollowGuard to your home screen for one-tap access.';
-    open();
-  });
-
-  btnInstall.addEventListener('click', async () => {
-    if (!deferredPrompt) { close(); return; }
-    deferredPrompt.prompt();
-    try { await deferredPrompt.userChoice; } catch {}
-    deferredPrompt = null;
-    close(365); // don’t bug again for a while
-  });
-
-  // ---- iOS: show a nice instruction sheet ----
-  function maybeShowIOSGuide() {
-    if (!isIOS || inStandalone) return;
-    iosRow.style.display = 'flex';
-    btnInstall.style.display = 'none';
-    textEl.innerHTML = 'Install UnfollowGuard on your home screen for fast access.';
-    open();
-  }
-
-  // Show after a small delay or first interaction (feels less spammy)
-  setTimeout(maybeShowIOSGuide, 1800);
-  window.addEventListener('scroll', maybeShowIOSGuide, { once:true });
-  window.addEventListener('click',  maybeShowIOSGuide, { once:true });
-
-  // ---- minimal SW so Android install criteria is met ----
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw-a2hs.js').catch(()=>{});
-  }
-})();
-</script>
-
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar">
-    <a class="btnlink" href="/">← How it works</a>
-  </div>
-
-  <!-- HERO -->
   <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo" />
   <p class="subtitle">Analyze Instagram exports. Compare followers &amp; following, whitelist brands, and export results.</p>
 
-  <!-- DROP + CLICK -->
+  <div id="demoBadge" class="demo-badge">Demo mode — sample data loaded</div>
+
   <div id="drop" class="drop centered">
     <div><strong>Drag &amp; drop followers_*.json + following.json here</strong></div>
     <div class="click-hint">or <u><strong>click here</strong></u> to select your files</div>
+    <div class="micro">Works with multiple followers_*.json files. Nothing is uploaded.</div>
     <input id="picker" type="file" accept=".json" multiple class="hidden" />
   </div>
 
-  <!-- HINTS -->
   <div class="hints">
     <div class="hint">Followers files: <span class="val" id="followersHint">none</span></div>
     <div class="hint right">Following files: <span class="val" id="followingHint">none</span></div>
   </div>
 
-  <!-- STATS -->
   <div class="stats">
     <div class="chip"><span class="k">Followers</span><span class="v" id="followersCount">0</span></div>
     <div class="chip"><span class="k">Not Following You Back</span><span class="v" id="nfCount">0</span></div>
   </div>
 
-  <!-- RESULTS -->
   <div class="row">
     <div class="panel">
       <h3>Not Following You Back</h3>
@@ -294,7 +109,6 @@ if ('serviceWorker' in navigator) {
     </div>
   </div>
 
-  <!-- ACTIONS -->
   <div class="btns">
     <button id="compareBtn" class="btn">Compare Now</button>
     <button id="exportBtn" class="btn secondary">Export Results</button>
@@ -302,19 +116,9 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <p id="status" class="footer">Ready.</p>
-
-  <!-- BRAND FOOTER -->
-  <hr class="divider">
-  <div class="brand-footer">
-    <a class="brand-badge" href="#" aria-label="DVN Ventures LLC">
-      <img src="dvn_logo.png" alt="DVN logo">
-      <span class="brand-name">DVN Ventures LLC</span>
-    </a>
-    <div class="brand-tag">© <span id="year"></span> DVN Ventures LLC</div>
-  </div>
 </div>
 
-<!-- WHITELIST MODAL -->
+<!-- Whitelist modal -->
 <div id="wlModal" class="hidden wrap" style="max-width:720px">
   <h2>Whitelist (one username per line)</h2>
   <textarea id="wlText" style="width:100%;min-height:200px;background:#0f111a;border:1px solid #2b2f42;color:#fff;border-radius:10px;padding:10px"></textarea>
@@ -338,6 +142,7 @@ const ydfbList = document.getElementById('ydfbList');
 const statusEl = document.getElementById('status');
 const drop = document.getElementById('drop');
 const picker = document.getElementById('picker');
+const demoBadge = document.getElementById('demoBadge');
 
 let followers = new Set(), following = new Set();
 let wl = new Set((localStorage.getItem('UG_whitelist')||'').split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
@@ -373,8 +178,9 @@ async function loadFiles(fileList){
       else { names.forEach(n=>followers.add(n)); fUsed.push(file.name); }
     }catch(e){ statusEl.textContent = `⚠️ Could not read ${file.name}`; }
   }
-  followersHint.textContent = fUsed.length? fUsed.slice(0,2).join(', ') + (fUsed.length>2?' ...':'') : 'none';
-  followingHint.textContent = gUsed.length? gUsed.slice(0,2).join(', ') + (gUsed.length>2?' ...':'') : 'none';
+
+  followersHint.textContent = fUsed.length? fUsed.slice(0,2).join(', ') + (fUsed.length>2?' …':'') : 'none';
+  followingHint.textContent = gUsed.length? gUsed.slice(0,2).join(', ') + (gUsed.length>2?' …':'') : 'none';
   followersCount.textContent = followers.size;
   nfCount.textContent = "0";
   nfList.textContent = ""; ydfbList.textContent = "";
@@ -389,11 +195,7 @@ drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.filter=''; loa
 
 function renderList(container, items){
   container.textContent = '';
-  for (const u of items){
-    const row = document.createElement('div');
-    row.textContent = '@' + u;
-    container.appendChild(row);
-  }
+  for (const u of items){ const row = document.createElement('div'); row.textContent = '@' + u; container.appendChild(row); }
 }
 
 document.getElementById('compareBtn').addEventListener('click', ()=>{
@@ -415,7 +217,7 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
   dl('you_dont_follow_back.txt', ydfb);
 });
 
-// Whitelist UI
+// Whitelist
 const wlModal = document.getElementById('wlModal');
 const wlText  = document.getElementById('wlText');
 
@@ -430,7 +232,6 @@ document.getElementById('wlSave').addEventListener('click', ()=>{
   wlModal.classList.add('hidden');
   statusEl.textContent = `Whitelist saved. ${wl.size} entries.`;
 });
-
 document.getElementById('wlExport').addEventListener('click', ()=>{
   const blob = new Blob([Array.from(wl).sort().join('\n')], {type:'text/plain'});
   const url = URL.createObjectURL(blob);
@@ -445,13 +246,25 @@ document.getElementById('wlImport').addEventListener('change', async (e)=>{
     wlText.value = Array.from(wl).sort().join('\n');
     localStorage.setItem('UG_whitelist', Array.from(wl).join('\n'));
     statusEl.textContent = `Whitelist imported. ${wl.size} entries.`;
-  }catch{
-    statusEl.textContent = '⚠️ Unable to import whitelist';
-  }
+  }catch{ statusEl.textContent = '⚠️ Unable to import whitelist'; }
 });
 
-// Year in footer
-document.getElementById('year').textContent = new Date().getFullYear();
+// --- Demo mode: ?demo=1 ---
+(function demoLoader(){
+  const params = new URLSearchParams(location.search);
+  if (!params.get('demo')) return;
+  demoBadge.style.display = 'inline-block';
+  // tiny believable sample
+  const demoFollowers = ['alex','bella','carla','dan','echo','brandxyz'];
+  const demoFollowing = ['alex','carla','echo','frank','gina','brandxyz'];
+  followers = new Set(demoFollowers);
+  following = new Set(demoFollowing);
+  followersHint.textContent = 'demo followers';
+  followingHint.textContent = 'demo following';
+  followersCount.textContent = followers.size;
+  statusEl.textContent = 'Demo data loaded. Click Compare.';
+})();
 </script>
 </body>
 </html>
+
