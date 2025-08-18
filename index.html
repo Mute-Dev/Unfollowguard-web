@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnfollowGuard</title>
+<title>UnfollowGuard — How it works</title>
 
 <!-- Security headers (meta) -->
 <meta http-equiv="Content-Security-Policy"
@@ -19,15 +19,15 @@
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0b0d16" />
 
-<!-- Social preview (Open Graph / Twitter) -->
-<meta property="og:title" content="UnfollowGuard" />
-<meta property="og:description" content="Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — all in your browser." />
+<!-- Social preview -->
+<meta property="og:title" content="UnfollowGuard — How it works" />
+<meta property="og:description" content="See how to export your Instagram followers/following and analyze them locally with UnfollowGuard." />
 <meta property="og:url" content="https://www.unfollowguard.com/" />
 <meta property="og:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="UnfollowGuard" />
-<meta name="twitter:description" content="Analyze Instagram exports. Compare followers & following, whitelist brands, and export results — all in your browser." />
+<meta name="twitter:title" content="UnfollowGuard — How it works" />
+<meta name="twitter:description" content="See how to export your Instagram followers/following and analyze them locally with UnfollowGuard." />
 <meta name="twitter:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
 
 <!-- Icons -->
@@ -41,312 +41,121 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- Make sure no old SW keeps stale HTML -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-}
-</script>
-
 <style>
   :root{
     --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
     --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
-
-    /* ==== YOUR GAP CONTROLS ==== */
-    --gap-under-logo:-120px; /* more negative = tighter space under logo */
-    --gap-under-title: 6px;  /* (kept for future title use) */
   }
-
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
   html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink)}
-  .wrap{max-width:1000px;margin:0 auto;padding:calc(0px + env(safe-area-inset-top)) 22px 22px}
-
-  /* ---------- HERO ---------- */
-  .logo{
-    display:block;
-    max-width:clamp(240px, 32vw, 360px);
-    height:auto;
-    margin:0 auto var(--gap-under-logo) auto !important;   /* no space above, tight below */
-  }
-  .subtitle{
-    color:var(--muted);text-align:center;margin:0 0 12px !important;line-height:1.35;
-  }
-
-  /* ---------- DROP / CLICK ---------- */
-  .centered{width:min(720px,92%);margin:0 auto}
-  .drop{
-    background:rgba(43,47,66,.7);backdrop-filter:blur(8px);
-    border:1px solid #6f7391;border-radius:20px;padding:12px 14px;text-align:center;cursor:pointer;transition:.15s
-  }
-  .drop:hover{filter:brightness(1.04)}
-  .click-hint{color:var(--muted);font-size:.9rem;margin-top:2px}
-  .hidden{display:none}
-
-  /* ---------- HINTS (ALIGNED UNDER DROP, SIDE-BY-SIDE) ---------- */
-  .hints{
-    width:min(720px,92%);margin:8px auto 6px;
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:6px 16px;align-items:center
-  }
-  .hint{display:flex;gap:6px;color:var(--muted);font-size:.95rem;white-space:nowrap}
-  .hint .val{color:#cfd1da;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .hint.right{justify-self:end} /* right cell aligns to the right edge */
-
-  /* ---------- STATS ---------- */
-  .stats{display:flex;gap:14px;justify-content:center;align-items:stretch;margin:8px auto;flex-wrap:wrap;width:min(720px,92%)}
-  .chip{background:var(--chip);padding:10px 14px;border-radius:12px;min-width:260px;
-        display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line)}
-  .chip .k{opacity:.9}.chip .v{font-weight:700}
-
-  /* ---------- PANELS ---------- */
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .panel{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);
-         border-radius:14px;padding:12px;min-height:320px;min-width:0}
-  .panel h3{margin:0 0 6px}
-  .list{height:260px;overflow:auto;background:#0f111a;border-radius:10px;padding:10px}
-
-  /* ---------- BUTTONS ---------- */
-  .btns{display:flex;gap:10px;justify-content:center;margin:12px 0 8px;flex-wrap:wrap}
-  .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer}
+  .wrap{max-width:1000px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 22px 24px}
+  a{color:#9aa3ff}
+  .topbar{display:flex;justify-content:flex-end}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
   .btn.secondary{background:#3b3f56}
-  .footer{color:var(--muted);text-align:center;margin:8px 0 24px}
+  .hero{display:flex;flex-direction:column;align-items:center;margin-top:8px}
+  .logo{width:min(360px,32vw);height:auto}
+  .title{font-size:clamp(32px,6vw,56px);font-weight:800;margin:12px 0 6px}
+  .subtitle{color:var(--muted);text-align:center;max-width:720px;margin:0 0 18px;line-height:1.45}
+  .cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0 22px}
 
-  /* ---------- BRAND FOOTER ---------- */
-  .divider{border:0;border-top:1px solid var(--line);width:min(720px,92%);margin:22px auto}
-  .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 0}
-  .brand-badge{
-    display:inline-flex;align-items:center;gap:12px;
-    background:rgba(36,39,58,.7);border:1px solid var(--line);
-    border-radius:14px;padding:10px 14px;text-decoration:none
-  }
-  .brand-badge img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
-  .brand-name{font-weight:700;color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:10px 0 24px}
+  .card{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h3{margin:0 0 8px}
+  .small{color:var(--muted);font-size:.95rem}
+
+  .faq{margin:18px 0}
+  details{background:rgba(23,26,37,.75);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+  summary{cursor:pointer;font-weight:600}
+
+  .divider{border:0;border-top:1px solid var(--line);width:min(720px,92%);margin:24px auto 18px}
+  .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .brand-badge{display:inline-flex;align-items:center;gap:12px;background:rgba(36,39,58,.7);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-decoration:none}
+  .brand-badge img{width:40px;height:40px;object-fit:contain}
+  .brand-name{font-weight:700}
   .brand-tag{color:var(--muted);font-size:.9rem}
 
-  /* ---------- MOBILE ---------- */
-  @media (max-width:700px){
-    :root{ --gap-under-logo:-12px; --gap-under-title:4px; }
-    .wrap{padding:calc(0px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
-    .logo{max-width:clamp(160px, 48vw, 240px)}
-    .subtitle{font-size:.95rem}
-
-    /* keep panels side-by-side via horizontal scroll */
-    .row{display:grid;grid-auto-flow:column;grid-auto-columns:min(88vw,480px);gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
-    .panel{min-height:260px}.list{height:240px}
-
-    .stats{flex-direction:column;gap:10px;width:100%}
-    .chip{width:100%;min-width:0;padding:12px 14px}
-
-    .brand-badge img{width:36px;height:36px}
+  @media (max-width:900px){ .grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:560px){
+    .wrap{padding:calc(8px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
+    .grid{grid-template-columns:1fr}
+    .logo{width:min(240px,48vw)}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <!-- HERO -->
-  <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo" />
-  <p class="subtitle">Analyze Instagram exports. Compare followers &amp; following, whitelist brands, and export results.</p>
-
-  <!-- DROP + CLICK -->
-  <div id="drop" class="drop centered">
-    <div><strong>Drag &amp; drop followers_*.json + following.json here</strong></div>
-    <div class="click-hint">or <u><strong>click here</strong></u> to select your files</div>
-    <input id="picker" type="file" accept=".json" multiple class="hidden" />
+  <div class="topbar">
+    <a class="btn secondary" href="/app.html" aria-label="Open the app">Open the app</a>
   </div>
 
-  <!-- HINTS (SIDE BY SIDE + ALIGNED) -->
-  <div class="hints">
-    <div class="hint">Followers files: <span class="val" id="followersHint">none</span></div>
-    <div class="hint right">Following files: <span class="val" id="followingHint">none</span></div>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats">
-    <div class="chip"><span class="k">Followers</span><span class="v" id="followersCount">0</span></div>
-    <div class="chip"><span class="k">Not Following You Back</span><span class="v" id="nfCount">0</span></div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="row">
-    <div class="panel">
-      <h3>Not Following You Back</h3>
-      <div id="nfList" class="list"></div>
+  <section class="hero">
+    <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo">
+    <h1 class="title">UnfollowGuard</h1>
+    <p class="subtitle">
+      Private-first Instagram follower auditor. Compare your <b>Followers</b> vs <b>Following</b>, whitelist brands/creators, and export results — entirely in your browser. No uploads. No tracking.
+    </p>
+    <div class="cta">
+      <a class="btn" href="/app.html">Open the app</a>
+      <a class="btn secondary" href="#steps">See how it works</a>
     </div>
-    <div class="panel">
-      <h3>You Don’t Follow Back</h3>
-      <div id="ydfbList" class="list"></div>
+  </section>
+
+  <section id="steps">
+    <h2>How it works (4 quick steps)</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>1) Download your data</h3>
+        <p class="small">From Instagram, export your account data as JSON (followers &amp; following). You’ll get files like <code>followers_1.json</code> and <code>following.json</code>.</p>
+      </div>
+      <div class="card">
+        <h3>2) Drag &amp; drop</h3>
+        <p class="small">Open the app and drag both files into the drop area (or click to select). Nothing is uploaded anywhere.</p>
+      </div>
+      <div class="card">
+        <h3>3) Compare</h3>
+        <p class="small">Click <b>Compare Now</b> to see <i>Not Following You Back</i> and <i>You Don’t Follow Back</i>. Use the whitelist to exclude brands/creators.</p>
+      </div>
+      <div class="card">
+        <h3>4) Export</h3>
+        <p class="small">Save clean text files of both lists for your records.</p>
+      </div>
     </div>
+  </section>
+
+  <section class="faq">
+    <h2>Privacy &amp; FAQ</h2>
+    <details>
+      <summary>Do my files leave my device?</summary>
+      <p class="small">No. UnfollowGuard runs fully in your browser. It never sends your data to a server.</p>
+    </details>
+    <details>
+      <summary>What file types are supported?</summary>
+      <p class="small">JSON exports from Instagram (followers, following). The app auto-detects both formats that Instagram uses.</p>
+    </details>
+    <details>
+      <summary>What’s the whitelist?</summary>
+      <p class="small">A local list of usernames you want to ignore (e.g., brands/celebrities). It’s stored in <code>localStorage</code> so it persists on your device.</p>
+    </details>
+  </section>
+
+  <div class="cta" style="margin-top:8px">
+    <a class="btn" href="/app.html">Open the app</a>
   </div>
 
-  <!-- ACTIONS -->
-  <div class="btns">
-    <button id="compareBtn" class="btn">Compare Now</button>
-    <button id="exportBtn" class="btn secondary">Export Results</button>
-    <button id="wlBtn" class="btn secondary">Manage Whitelist</button>
-  </div>
-
-  <p id="status" class="footer">Ready.</p>
-
-  <!-- BRAND FOOTER -->
   <hr class="divider">
   <div class="brand-footer">
     <a class="brand-badge" href="#" aria-label="DVN Ventures LLC">
       <img src="dvn_logo.png" alt="DVN logo">
       <span class="brand-name">DVN Ventures LLC</span>
     </a>
-    <div class="brand-tag"> — © <span id="year"></span></div>
+    <div class="brand-tag">© <span id="year"></span> DVN Ventures LLC</div>
   </div>
 </div>
 
-<!-- WHITELIST MODAL -->
-<div id="wlModal" class="hidden wrap" style="max-width:720px">
-  <h2>Whitelist (one username per line)</h2>
-  <textarea id="wlText" style="width:100%;min-height:200px;background:#0f111a;border:1px solid #2b2f42;color:#fff;border-radius:10px;padding:10px"></textarea>
-  <div class="btns">
-    <button id="wlSave" class="btn">Save</button>
-    <button id="wlExport" class="btn secondary">Export</button>
-    <label class="btn secondary" style="cursor:pointer">
-      Import <input id="wlImport" type="file" accept=".txt,.json" hidden>
-    </label>
-    <button id="wlClose" class="btn secondary">Close</button>
-  </div>
-</div>
-
-<script>
-const followersHint = document.getElementById('followersHint');
-const followingHint = document.getElementById('followingHint');
-const followersCount = document.getElementById('followersCount');
-const nfCount = document.getElementById('nfCount');
-const nfList = document.getElementById('nfList');
-const ydfbList = document.getElementById('ydfbList');
-const statusEl = document.getElementById('status');
-const drop = document.getElementById('drop');
-const picker = document.getElementById('picker');
-
-let followers = new Set(), following = new Set();
-let wl = new Set((localStorage.getItem('UG_whitelist')||'').split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
-
-function norm(s){ return s.trim().toLowerCase().replace(/^@/,''); }
-function usernamesFrom(json){
-  function fromArr(arr){ const out=new Set(); for(const e of arr||[]) {
-    const sld = e?.string_list_data?.[0];
-    if (sld?.value) out.add(norm(sld.value));
-    else if (sld?.href){ try{
-      const u = new URL(sld.href);
-      const first = u.pathname.replace(/^\/+/,'').split('/')[0];
-      if(first) out.add(norm(first));
-    }catch{} }
-  } return out; }
-  if (Array.isArray(json)) return fromArr(json);
-  for (const k of ["relationships_followers","relationships_following","followers","following"])
-    if (json?.[k]) return fromArr(json[k]);
-  return new Set();
-}
-
-async function loadFiles(fileList){
-  const fUsed=[], gUsed=[];
-  const files = Array.from(fileList);
-  followers.clear(); following.clear();
-
-  for (const file of files){
-    try{
-      // Large file guard (15 MB)
-      if (file.size > 15 * 1024 * 1024) {
-        statusEl.textContent = `⚠️ ${file.name} is too large; skipped.`;
-        continue;
-      }
-      const data = JSON.parse(await file.text());
-      const names = usernamesFrom(data);
-      if (file.name.toLowerCase().includes('following')) { names.forEach(n=>following.add(n)); gUsed.push(file.name); }
-      else { names.forEach(n=>followers.add(n)); fUsed.push(file.name); }
-    }catch(e){
-      statusEl.textContent = `⚠️ Could not read ${file.name}`;
-    }
-  }
-  followersHint.textContent = fUsed.length? fUsed.slice(0,2).join(', ') + (fUsed.length>2?' ...':'') : 'none';
-  followingHint.textContent = gUsed.length? gUsed.slice(0,2).join(', ') + (gUsed.length>2?' ...':'') : 'none';
-  followersCount.textContent = followers.size;
-  nfCount.textContent = "0";
-  nfList.textContent = ""; ydfbList.textContent = "";
-  statusEl.textContent = `Loaded ${followers.size} followers and ${following.size} following. Click Compare.`;
-}
-
-drop.addEventListener('click', ()=> picker.click());
-picker.addEventListener('change', e => loadFiles(e.target.files));
-drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.filter='brightness(1.06)' });
-drop.addEventListener('dragleave', ()=> drop.style.filter='' );
-drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.filter=''; loadFiles(e.dataTransfer.files); });
-
-// Safe list rendering (no innerHTML)
-function renderList(container, items){
-  container.textContent = '';
-  for (const u of items){
-    const row = document.createElement('div');
-    row.textContent = '@' + u;
-    container.appendChild(row);
-  }
-}
-
-document.getElementById('compareBtn').addEventListener('click', ()=>{
-  const nf   = [...following].filter(u=>!followers.has(u) && !wl.has(u)).sort();
-  const ydfb = [...followers].filter(u=>!following.has(u) && !wl.has(u)).sort();
-  nfCount.textContent = nf.length;
-  renderList(nfList, nf);
-  renderList(ydfbList, ydfb);
-  statusEl.textContent = `Compare complete. ${nf.length} not following you back, ${ydfb.length} you don’t follow back.`;
-});
-
-document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const dl = (name, rows)=>{ const blob = new Blob([rows.join('\n')], {type:'text/plain'});
-    const url = URL.createObjectURL(blob); const a = Object.assign(document.createElement('a'), {href:url, download:name});
-    a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500); };
-  const nf   = Array.from(nfList.children).map(d=>d.textContent.replace(/^@/,'')); 
-  const ydfb = Array.from(ydfbList.children).map(d=>d.textContent.replace(/^@/,'')); 
-  dl('not_following_you_back.txt', nf);
-  dl('you_dont_follow_back.txt', ydfb);
-});
-
-// Whitelist UI
-const wlModal = document.getElementById('wlModal');
-const wlText  = document.getElementById('wlText');
-
-document.getElementById('wlBtn').addEventListener('click', ()=>{
-  wlText.value = Array.from(wl).sort().join('\n');
-  wlModal.classList.remove('hidden');
-});
-document.getElementById('wlClose').addEventListener('click', ()=> wlModal.classList.add('hidden'));
-document.getElementById('wlSave').addEventListener('click', ()=>{
-  wl = new Set(wlText.value.split('\n').map(s=>norm(s)).filter(Boolean));
-  localStorage.setItem('UG_whitelist', Array.from(wl).join('\n'));
-  wlModal.classList.add('hidden');
-  statusEl.textContent = `Whitelist saved. ${wl.size} entries.`;
-});
-
-// Whitelist Export / Import
-document.getElementById('wlExport').addEventListener('click', ()=>{
-  const blob = new Blob([Array.from(wl).sort().join('\n')], {type:'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement('a'), {href:url, download:'unfollowguard_whitelist.txt'});
-  a.click(); setTimeout(()=>URL.revokeObjectURL(url), 500);
-});
-document.getElementById('wlImport').addEventListener('change', async (e)=>{
-  const file = e.target.files[0]; if(!file) return;
-  try{
-    const text = await file.text();
-    wl = new Set(text.split(/\r?\n/).map(s=>norm(s)).filter(Boolean));
-    wlText.value = Array.from(wl).sort().join('\n');
-    localStorage.setItem('UG_whitelist', Array.from(wl).join('\n'));
-    statusEl.textContent = `Whitelist imported. ${wl.size} entries.`;
-  }catch{
-    statusEl.textContent = '⚠️ Unable to import whitelist';
-  }
-});
-
-// Year in footer
-document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
+
 
