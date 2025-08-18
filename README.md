@@ -67,6 +67,18 @@ Already set up for this repo. If you fork:
 Add to Home Screen on iOS/Android or “Install App” in desktop Chrome.
 
 
+---
+
+<p align="center">
+  <img src="./dvn_logo.png" alt="DVN logo" width="64" height="64" />
+</p>
+<p align="center">
+  <b>DVN Ventures LLC</b><br/>
+  <sub>Built with care.</sub>
+</p>
+
+
+
 📜 License
 
 MIT — do whatever, just don’t hold us liable.

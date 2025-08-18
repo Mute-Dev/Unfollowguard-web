@@ -113,6 +113,18 @@ if ('serviceWorker' in navigator) {
   .btn.secondary{background:#3b3f56}
   .footer{color:var(--muted);text-align:center;margin:8px 0 24px}
 
+  /* ---------- BRAND FOOTER ---------- */
+  .divider{border:0;border-top:1px solid var(--line);width:min(720px,92%);margin:22px auto}
+  .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px;margin:8px 0 0}
+  .brand-badge{
+    display:inline-flex;align-items:center;gap:12px;
+    background:rgba(36,39,58,.7);border:1px solid var(--line);
+    border-radius:14px;padding:10px 14px;text-decoration:none
+  }
+  .brand-badge img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+  .brand-name{font-weight:700;color:var(--ink)}
+  .brand-tag{color:var(--muted);font-size:.9rem}
+
   /* ---------- MOBILE ---------- */
   @media (max-width:700px){
     :root{ --gap-under-logo:-12px; --gap-under-title:4px; }
@@ -126,6 +138,8 @@ if ('serviceWorker' in navigator) {
 
     .stats{flex-direction:column;gap:10px;width:100%}
     .chip{width:100%;min-width:0;padding:12px 14px}
+
+    .brand-badge img{width:36px;height:36px}
   }
 </style>
 </head>
@@ -174,6 +188,16 @@ if ('serviceWorker' in navigator) {
   </div>
 
   <p id="status" class="footer">Ready.</p>
+
+  <!-- BRAND FOOTER -->
+  <hr class="divider">
+  <div class="brand-footer">
+    <a class="brand-badge" href="#" aria-label="DVN Ventures LLC">
+      <img src="dvn_logo.png" alt="DVN logo">
+      <span class="brand-name">DVN Ventures LLC</span>
+    </a>
+    <div class="brand-tag">Built with care — © <span id="year"></span></div>
+  </div>
 </div>
 
 <!-- WHITELIST MODAL -->
@@ -260,7 +284,7 @@ function renderList(container, items){
   container.textContent = '';
   for (const u of items){
     const row = document.createElement('div');
-    row.textContent = '@' + u;  // textContent = safe
+    row.textContent = '@' + u;
     container.appendChild(row);
   }
 }
@@ -319,6 +343,9 @@ document.getElementById('wlImport').addEventListener('change', async (e)=>{
     statusEl.textContent = '⚠️ Unable to import whitelist';
   }
 });
+
+// Year in footer
+document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
