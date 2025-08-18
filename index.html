@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UnfollowGuard — How it works</title>
 
-<!-- Security headers (meta) -->
+<!-- Security -->
 <meta http-equiv="Content-Security-Policy"
   content="default-src 'self';
            script-src 'self' 'unsafe-inline';
@@ -21,13 +21,12 @@
 
 <!-- Social preview -->
 <meta property="og:title" content="UnfollowGuard — How it works" />
-<meta property="og:description" content="See how to export your Instagram followers/following and analyze them locally with UnfollowGuard." />
+<meta property="og:description" content="Download your Instagram data and analyze followers locally with UnfollowGuard." />
 <meta property="og:url" content="https://www.unfollowguard.com/" />
 <meta property="og:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
-<meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="UnfollowGuard — How it works" />
-<meta name="twitter:description" content="See how to export your Instagram followers/following and analyze them locally with UnfollowGuard." />
+<meta name="twitter:description" content="Download your Instagram data and analyze followers locally with UnfollowGuard." />
 <meta name="twitter:image" content="https://www.unfollowguard.com/social-card-1200x630.png" />
 
 <!-- Icons -->
@@ -39,109 +38,157 @@
 <link rel="manifest" href="/site.webmanifest">
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--accent:#6c63ff;
-    --line:#2e3247;--chip:#24273a;--ink:#e9eaf0;
+    --bg0:#0b0d16;--bg1:#0e101a;--panel:#171a25;--muted:#a6a8b3;--ink:#e9eaf0;--accent:#6c63ff;--line:#2e3247;--chip:#24273a;
+    --ok:#2ecc71;--warn:#ffcc66;
   }
   *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif}
   html,body{height:100%}
   body{margin:0;background:linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink)}
-  .wrap{max-width:1000px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 22px 24px}
   a{color:#9aa3ff}
-  .topbar{display:flex;justify-content:flex-end}
-  .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+  .wrap{max-width:1100px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 22px 28px}
+
+  /* Top bar */
+  .topbar{display:flex;justify-content:flex-end;gap:10px}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
   .btn.secondary{background:#3b3f56}
-  .hero{display:flex;flex-direction:column;align-items:center;margin-top:8px}
+  .pill{font-size:.85rem;background:rgba(108,99,255,.18);border:1px solid rgba(108,99,255,.4);color:#cfd1ff;border-radius:999px;padding:6px 10px}
+
+  /* Hero */
+  .hero{display:flex;flex-direction:column;align-items:center;margin:8px 0 18px}
   .logo{width:min(360px,32vw);height:auto}
-  .title{font-size:clamp(32px,6vw,56px);font-weight:800;margin:12px 0 6px}
-  .subtitle{color:var(--muted);text-align:center;max-width:720px;margin:0 0 18px;line-height:1.45}
-  .cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0 22px}
+  .title{font-size:clamp(36px,6vw,60px);font-weight:800;margin:8px 0 4px}
+  .subtitle{color:var(--muted);text-align:center;max-width:780px;margin:0 0 14px;line-height:1.45}
+  .bsafe{display:flex;gap:8px;align-items:center;margin:6px 0 18px}
+  .bsafe .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0 22px}
 
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:10px 0 24px}
-  .card{background:rgba(23,26,37,.75);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;padding:16px}
-  .card h3{margin:0 0 8px}
-  .small{color:var(--muted);font-size:.95rem}
+  /* Sections */
+  .section-title{font-size:1.35rem;margin:14px 0 8px}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  .card{background:rgba(23,26,37,.78);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .card h3{margin:0 0 10px}
+  .small{color:var(--muted);font-size:.97rem}
+  .num{display:inline-grid;place-content:center;width:28px;height:28px;border-radius:999px;background:#2c3050;border:1px solid var(--line);font-weight:700;margin-right:8px}
 
-  .faq{margin:18px 0}
-  details{background:rgba(23,26,37,.75);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin:10px 0 12px}
+  .tab{border:1px solid var(--line);background:#22263a;color:#cfd1da;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .tab.active{background:var(--accent);border-color:transparent;color:#fff}
+  .tabpanes > div{display:none}
+  .tabpanes > div.active{display:block}
+
+  /* Finder box */
+  .finder{background:#111320;border:1px dashed #3a3f5f;border-radius:12px;padding:10px 12px;color:#cfd1da}
+  .finder code{color:#e9eaf0}
+
+  /* FAQ */
+  details{background:rgba(23,26,37,.78);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
   summary{cursor:pointer;font-weight:600}
 
-  .divider{border:0;border-top:1px solid var(--line);width:min(720px,92%);margin:24px auto 18px}
+  /* Divider + brand */
+  .divider{border:0;border-top:1px solid var(--line);width:min(780px,92%);margin:26px auto 18px}
   .brand-footer{display:flex;flex-direction:column;align-items:center;gap:8px}
   .brand-badge{display:inline-flex;align-items:center;gap:12px;background:rgba(36,39,58,.7);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-decoration:none}
   .brand-badge img{width:40px;height:40px;object-fit:contain}
   .brand-name{font-weight:700}
   .brand-tag{color:var(--muted);font-size:.9rem}
 
-  @media (max-width:900px){ .grid{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:560px){
-    .wrap{padding:calc(8px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))}
-    .grid{grid-template-columns:1fr}
-    .logo{width:min(240px,48vw)}
-  }
+  @media (max-width:950px){ .grid{grid-template-columns:1fr} .logo{width:min(260px,48vw)} }
+  @media (max-width:560px){ .wrap{padding:calc(8px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom))} }
 </style>
 </head>
 <body>
 <div class="wrap">
+
   <div class="topbar">
-    <a class="btn secondary" href="/app.html" aria-label="Open the app">Open the app</a>
+    <span class="pill">Browser-only • No upload</span>
+    <a class="btn" href="/app.html">Open the app</a>
   </div>
 
   <section class="hero">
     <img class="logo" src="unfollowguard_logo.png" alt="UnfollowGuard logo">
     <h1 class="title">UnfollowGuard</h1>
     <p class="subtitle">
-      Private-first Instagram follower auditor. Compare your <b>Followers</b> vs <b>Following</b>, whitelist brands/creators, and export results — entirely in your browser. No uploads. No tracking.
+      Check who doesn’t follow you back (and who you don’t follow back) using your Instagram export.
+      Everything runs **locally** in your browser—no logins, no servers.
     </p>
+    <div class="bsafe"><span class="dot"></span> <span class="small">100% privacy-first • files never leave your device</span></div>
     <div class="cta">
+      <a class="btn" href="/app.html">Skip to app</a>
+      <a class="btn secondary" href="#how">How it works</a>
+    </div>
+  </section>
+
+  <section id="how" class="card">
+    <h2 class="section-title">How to download your Instagram data</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="mobile">Mobile</button>
+      <button class="tab" data-tab="desktop">Desktop</button>
+    </div>
+
+    <div class="tabpanes">
+      <!-- MOBILE -->
+      <div id="pane-mobile" class="active small">
+        <p><span class="num">1</span>Open the Instagram app → <b>Menu</b> (☰) → <b>Settings and privacy</b>.</p>
+        <p><span class="num">2</span>Go to <b>Account Center</b> → <b>Your information and permissions</b> → <b>Download your information</b>.</p>
+        <p><span class="num">3</span>Select your Instagram account. Tap <b>Some of your information</b> → search/select <b>Followers and following</b>.</p>
+        <p><span class="num">4</span>At the bottom, set <b>Date range</b> to <b>All time</b>, choose <b>Format: JSON</b>, and tap <b>Create files</b>.</p>
+        <p class="small" style="margin-top:10px;color:#ffdf9d">Tip: JSON is required (not HTML). The app reads JSON only.</p>
+      </div>
+
+      <!-- DESKTOP -->
+      <div id="pane-desktop" class="small">
+        <p><span class="num">1</span>Open <b>instagram.com</b> in a browser → <b>More</b> (left sidebar) → <b>Settings</b>.</p>
+        <p><span class="num">2</span>Go to <b>Accounts Center</b> → <b>Your information and permissions</b> → <b>Download your information</b>.</p>
+        <p><span class="num">3</span>Choose your IG account → <b>Some of your information</b> → select <b>Followers and following</b>.</p>
+        <p><span class="num">4</span>Set <b>Date range</b> to <b>All time</b> • <b>Format</b>: <b>JSON</b> • then <b>Create files</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid" style="margin-top:14px">
+    <div class="card">
+      <h3>What you’ll receive</h3>
+      <p class="small">Instagram emails you a link to download a <b>.zip</b> file. When you unzip it, look for the JSON files below (names may vary slightly):</p>
+      <div class="finder small">
+        <div>• <code>followers_1.json</code> (sometimes followers_2.json, followers_3.json…)</div>
+        <div>• <code>following.json</code></div>
+        <div style="margin-top:6px">Common locations in the export:</div>
+        <div>• <code>followers_and_following/followers_1.json</code></div>
+        <div>• <code>followers_and_following/following.json</code></div>
+        <div>or (older exports)</div>
+        <div>• <code>connections/followers_1.json</code></div>
+        <div>• <code>connections/following.json</code></div>
+      </div>
+      <p class="small" style="margin-top:8px">If you see multiple <code>followers_*.json</code> files, that’s normal—Instagram splits large lists. The app merges them automatically.</p>
+    </div>
+
+    <div class="card">
+      <h3>Use them in UnfollowGuard</h3>
+      <ol class="small" style="margin:0 0 10px 18px;line-height:1.6">
+        <li>Open the app: <a href="/app.html">unfollowguard.com/app.html</a></li>
+        <li>Drag in <b>all</b> <code>followers_*.json</code> files <i>and</i> <code>following.json</code> (or click to select).</li>
+        <li>Click <b>Compare Now</b>.</li>
+        <li>(Optional) Add brands/creators to your <b>Whitelist</b> so they don’t show up in results.</li>
+        <li>Export both lists to clean text files.</li>
+      </ol>
       <a class="btn" href="/app.html">Open the app</a>
-      <a class="btn secondary" href="#steps">See how it works</a>
     </div>
-  </section>
+  </div>
 
-  <section id="steps">
-    <h2>How it works (4 quick steps)</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>1) Download your data</h3>
-        <p class="small">From Instagram, export your account data as JSON (followers &amp; following). You’ll get files like <code>followers_1.json</code> and <code>following.json</code>.</p>
-      </div>
-      <div class="card">
-        <h3>2) Drag &amp; drop</h3>
-        <p class="small">Open the app and drag both files into the drop area (or click to select). Nothing is uploaded anywhere.</p>
-      </div>
-      <div class="card">
-        <h3>3) Compare</h3>
-        <p class="small">Click <b>Compare Now</b> to see <i>Not Following You Back</i> and <i>You Don’t Follow Back</i>. Use the whitelist to exclude brands/creators.</p>
-      </div>
-      <div class="card">
-        <h3>4) Export</h3>
-        <p class="small">Save clean text files of both lists for your records.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="faq">
-    <h2>Privacy &amp; FAQ</h2>
-    <details>
-      <summary>Do my files leave my device?</summary>
-      <p class="small">No. UnfollowGuard runs fully in your browser. It never sends your data to a server.</p>
-    </details>
-    <details>
-      <summary>What file types are supported?</summary>
-      <p class="small">JSON exports from Instagram (followers, following). The app auto-detects both formats that Instagram uses.</p>
-    </details>
-    <details>
-      <summary>What’s the whitelist?</summary>
-      <p class="small">A local list of usernames you want to ignore (e.g., brands/celebrities). It’s stored in <code>localStorage</code> so it persists on your device.</p>
-    </details>
-  </section>
-
-  <div class="cta" style="margin-top:8px">
-    <a class="btn" href="/app.html">Open the app</a>
+  <div class="card" style="margin-top:14px">
+    <h3>Troubleshooting</h3>
+    <ul class="small" style="margin:8px 0 0 18px;line-height:1.6">
+      <li><b>No results?</b> Make sure you selected the JSON format when creating the export, not HTML.</li>
+      <li><b>Still zipped?</b> Unzip the downloaded file first, then drag the JSON files into the app.</li>
+      <li><b>Different file names?</b> That’s okay—look for any files that clearly contain followers or following in JSON.</li>
+      <li><b>Privacy check:</b> the app never uploads your files; everything runs locally.</li>
+    </ul>
   </div>
 
   <hr class="divider">
@@ -152,9 +199,24 @@
     </a>
     <div class="brand-tag">© <span id="year"></span> DVN Ventures LLC</div>
   </div>
+
 </div>
 
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script>
+  // Tabs: Mobile / Desktop
+  const tabs = document.querySelectorAll('.tab');
+  const panes = { mobile: document.getElementById('pane-mobile'), desktop: document.getElementById('pane-desktop') };
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      panes.mobile.classList.toggle('active', t.dataset.tab==='mobile');
+      panes.desktop.classList.toggle('active', t.dataset.tab==='desktop');
+    });
+  });
+  // Year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
 
