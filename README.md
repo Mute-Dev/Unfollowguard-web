@@ -74,7 +74,6 @@ Add to Home Screen on iOS/Android or “Install App” in desktop Chrome.
 </p>
 <p align="center">
   <b>DVN Ventures LLC</b><br/>
-  <sub>Built with care.</sub>
 </p>
 
 
