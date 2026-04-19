@@ -147,21 +147,60 @@ const demoBadge = document.getElementById('demoBadge');
 let followers = new Set(), following = new Set();
 let wl = new Set((localStorage.getItem('UG_whitelist')||'').split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
 
-function norm(s){ return s.trim().toLowerCase().replace(/^@/,''); }
+function norm(s){
+  if (typeof s !== 'string') return null;
+  const value = s.trim().toLowerCase().replace(/^@/, '');
+  if (!value) return null;
+  if (!/^[a-z0-9._]+$/.test(value)) return null;
+  return value;
+}
+
+function usernameFromHref(href){
+  if (typeof href !== 'string') return null;
+  try{
+    const u = new URL(href);
+    const parts = u.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+    if (!parts.length) return null;
+    const last = parts[parts.length - 1];
+    return norm(last);
+  }catch{
+    return null;
+  }
+}
+
 function usernamesFrom(json){
-  function fromArr(arr){ const out=new Set(); for(const e of arr||[]) {
-    const sld = e?.string_list_data?.[0];
-    if (sld?.value) out.add(norm(sld.value));
-    else if (sld?.href){ try{
-      const u = new URL(sld.href);
-      const first = u.pathname.replace(/^\/+/,'').split('/')[0];
-      if(first) out.add(norm(first));
-    }catch{} }
-  } return out; }
-  if (Array.isArray(json)) return fromArr(json);
-  for (const k of ["relationships_followers","relationships_following","followers","following"])
-    if (json?.[k]) return fromArr(json[k]);
-  return new Set();
+  const out = new Set();
+
+  function walk(node){
+    if (Array.isArray(node)){
+      for (const item of node) walk(item);
+      return;
+    }
+
+    if (!node || typeof node !== 'object') return;
+
+    const titleUser = norm(node.title);
+    if (titleUser) out.add(titleUser);
+
+    if (Array.isArray(node.string_list_data)){
+      for (const item of node.string_list_data){
+        if (!item || typeof item !== 'object') continue;
+
+        const valueUser = norm(item.value);
+        if (valueUser) out.add(valueUser);
+
+        const hrefUser = usernameFromHref(item.href);
+        if (hrefUser) out.add(hrefUser);
+      }
+    }
+
+    for (const value of Object.values(node)){
+      walk(value);
+    }
+  }
+
+  walk(json);
+  return out;
 }
 
 async function loadFiles(fileList){
